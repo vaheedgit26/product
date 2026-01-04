@@ -1,1 +1,12 @@
+project: expense
+component: frontend
 
+image:
+  imageName: vaheeddockerhub/expense-frontend
+  imageVersion: 2fd088e
+  
+deployment:
+  replicas: 1
+  
+hpa:
+  utilisation: 5
