@@ -45,7 +45,7 @@ spec:
             
       containers:
       - name: product-backend-cont
-        image: vaheeddockerhub/product-img
+        image: "{{ .Values.image.imageName }}:{{ .Values.image.imageVersion }}"   # vaheeddockerhub/product-img
         ports:
         - name: product
           containerPort: 8080
