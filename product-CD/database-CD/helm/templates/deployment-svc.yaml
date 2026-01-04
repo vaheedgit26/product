@@ -99,7 +99,7 @@ spec:
                 - mysqladmin ping -h 127.0.0.1 -u healthcheck -p"$MYSQL_HEALTHCHECK_PASSWORD" >/dev/null 2>&1
             initialDelaySeconds: 60
             periodSeconds: 10
-            timeoutSeconds: 2
+            timeoutSeconds: 5
             failureThreshold: 3
             
 ---
