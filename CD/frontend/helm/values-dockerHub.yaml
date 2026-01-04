@@ -2,7 +2,7 @@ project: expense
 component: frontend
 
 image:
-  imageName: vaheeddockerhub/expense-frontend
+  imageName: vaheeddockerhub/product-frontend
   imageVersion: 2fd088e
   
 deployment:
