@@ -5,7 +5,7 @@ metadata:
 data:
   # Mysql init script
   init.sql: |
-      CREATE USER IF NOT EXISTS 'healthcheck'@'%' IDENTIFIED BY 'p@ssword';
+        CREATE USER IF NOT EXISTS 'healthcheck'@'%' IDENTIFIED BY 'p@ssword';
       GRANT USAGE ON *.* TO 'healthcheck'@'%';
       
       SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
