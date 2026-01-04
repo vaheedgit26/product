@@ -1,5 +1,5 @@
 image:
-  imageName: vaheeddockerhub/expense-backend
+  imageName: vaheeddockerhub/product-backend
   imageVersion: 68eca7c
 
 deployment:
