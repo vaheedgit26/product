@@ -62,10 +62,10 @@ spec:
         startupProbe:
           tcpSocket:
             port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 10
-          failureThreshold: 6
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 20
         
         readinessProbe:
             tcpSocket:
@@ -78,7 +78,7 @@ spec:
         livenessProbe:
             tcpSocket:
               port: 8080
-            initialDelaySeconds: 15
+            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
@@ -91,7 +91,7 @@ metadata:
     app: product-backend
     tier: backend
 spec:
-  #type: ClusterIP
+  type: ClusterIP
   selector:
     app: product-backend
     tier: backend
