@@ -46,7 +46,7 @@ spec:
       project: "{{project}}"         # This name should match with the name of 'AppProject' created previously
 
       source:
-        repoURL: https://github.com/vaheedgit26/expense.git
+        repoURL: https://github.com/vaheedgit26/product.git
         targetRevision: main
         path: product-CD/{{component}}/helm                   
         helm:
