@@ -3,7 +3,7 @@ component: frontend
 
 image:
   imageName: vaheeddockerhub/product-frontend
-  imageVersion: 2fd088e
+  imageVersion: latest 
   
 deployment:
   replicas: 1
