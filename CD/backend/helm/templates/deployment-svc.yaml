@@ -92,7 +92,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: product-backend
+  name: product-backend        # Service name
   labels:
     app: product-backend
     tier: backend
