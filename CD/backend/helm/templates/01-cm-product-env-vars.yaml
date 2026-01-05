@@ -6,4 +6,3 @@ data:
   DB_HOST: "mysql-svc"  # Service name of Mysql pod's service
   DB_USERNAME: "product"
   DB_NAME: "product"
-  DB_HEALTHCHECK_USER: "healthcheck"
