@@ -6,7 +6,7 @@ metadata:
     app: product-frontend
     tier: frontend
 spec:
-  replicas: {{ .Values.deployment.replicas }}
+  replicas: 1
   selector:
     matchLabels:
       app: product-frontend
@@ -25,7 +25,7 @@ spec:
 
       containers:
       - name: product-frontend-cont
-        image: "{{ .Values.image.imageName }}:{{ .Values.image.imageVersion }}"          
+        image: <<Image-Name>>          
         ports:
         - name: frontend
           containerPort: 8080
