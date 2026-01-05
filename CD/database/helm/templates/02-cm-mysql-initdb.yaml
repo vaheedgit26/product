@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: mysql-initdb-config
 data:
+  DB_HEALTHCHECK_USER: "healthcheck"
+
   # Mysql init script
   init.sql: |
       CREATE USER IF NOT EXISTS 'healthcheck'@'%' IDENTIFIED BY 'p@ssword';
