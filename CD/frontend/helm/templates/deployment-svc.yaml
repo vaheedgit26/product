@@ -6,7 +6,7 @@ metadata:
     app: product-frontend
     tier: frontend
 spec:
-  replicas: 1
+  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
       app: product-frontend
@@ -30,10 +30,10 @@ spec:
 
       containers:
       - name: product-frontend-cont
-        image: nginx:1.27.4
+        image: "{{ .Values.image.imageName }}:{{ .Values.image.imageVersion }}"          # nginx:1.27.4
         ports:
         - name: frontend
-          containerPort: 80
+          containerPort: 8080
         volumeMounts:
         - name: product-nginx-reverse-proxy
           mountPath: /etc/nginx/conf.d/
