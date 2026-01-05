@@ -8,7 +8,7 @@ data:
         # This should be placed in /etc/nginx/conf.d/product.conf
         server {
             
-            listen 80 default_server;  # Treated as default server for every request
+            listen 8080 default_server;  # Treated as default server for every request
             server_name _;
 
             proxy_http_version 1.1;
