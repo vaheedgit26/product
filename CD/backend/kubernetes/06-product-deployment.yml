@@ -19,21 +19,35 @@ spec:
     spec:
            
       initContainers:
-      - name: connectivity-init-db
-        image: mysql:8.0
-        command: ["sh", "-c", 'echo -e "Checking for the availability of MySQL Server"; until mysqladmin ping -h "$DB_HOST" -u root -p"$MYSQL_ROOT_PASSWORD"; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']
-        #command: ['/bin/bash', '-c', '/mnt/mysql_health_check.sh && mysql -h $MYSQL_HOST -u$MYSQL_ROOT_PASSWORD -p$MYSQL_ROOT_PASSWORD < /mnt/init.sql']
+      - name: wait-for-mysql
+        image: mariadb:10.11.3
+        command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for MySQL to be ready..."
+              until mysql -h $DB_HOST -u $DB_HEALTHCHECK_USER -e "SELECT 1" >/dev/null 2>&1; do
+                sleep 3
+              done
+              echo "MySQL is ready"
         env:
         - name: DB_HOST  
           valueFrom:
             configMapKeyRef:
               name: product-backend-env-vars  
-              key: DB_HOST  
-        - name: MYSQL_ROOT_PASSWORD
+              key: DB_HOST
+
+        - name: DB_HEALTHCHECK_USER  
+          valueFrom:
+            configMapKeyRef:
+              name: product-backend-env-vars  
+              key: DB_HEALTHCHECK_USER
+              
+        - name: MYSQL_PWD
           valueFrom:
             secretKeyRef:
               name: mysql-secret
-              key: MYSQL_ROOT_PASSWORD
+              key: MYSQL_HEALTHCHECK_PASSWORD
             
       containers:
       - name: product-backend-cont
@@ -54,15 +68,15 @@ spec:
         startupProbe:
           tcpSocket:
             port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 10
-          failureThreshold: 6
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 20
         
         readinessProbe:
             tcpSocket:
               port: 8080
-            initialDelaySeconds: 15
+            initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
@@ -70,7 +84,7 @@ spec:
         livenessProbe:
             tcpSocket:
               port: 8080
-            initialDelaySeconds: 15
+            initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 10
             failureThreshold: 3
@@ -78,12 +92,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: product-backend
+  name: product-backend        # Service name
   labels:
     app: product-backend
     tier: backend
 spec:
-  #type: ClusterIP
+  type: ClusterIP
   selector:
     app: product-backend
     tier: backend
