@@ -7,13 +7,13 @@ spec:
   generators:
   - list:
       elements:
-        - project: expense
+        - project: product
           env: dev
           component: backend
-        - project: expense
+        - project: product
           env: dev
           component: frontend
-        - project: expense
+        - project: product
           env: dev
           component: database
 
@@ -48,7 +48,7 @@ spec:
       source:
         repoURL: https://github.com/vaheedgit26/expense.git
         targetRevision: main
-        path: expense-CD/{{component}}/CD/helm                   
+        path: product-CD/{{component}}/helm                   
         helm:
           releaseName: "{{project}}-{{env}}-{{component}}"  # must be <= 53 chars
           valueFiles:
