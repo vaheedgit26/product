@@ -25,7 +25,8 @@ spec:
 
       containers:
       - name: product-frontend-cont
-        image: "{{ .Values.image.imageName }}:{{ .Values.image.imageVersion }}"          
+        image: "{{ .Values.image.imageName }}:{{ .Values.image.imageVersion }}"
+        imagePullPolicy: IfNotPresent
         ports:
         - name: frontend
           containerPort: 8080
