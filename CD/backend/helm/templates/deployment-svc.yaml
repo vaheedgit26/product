@@ -47,7 +47,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: mysql-secret
-              key: MYSQL_HEALTHCHECK_PASSWORD
+              key: DB_HEALTHCHECK_PASSWORD
             
       containers:
       - name: product-backend-cont
