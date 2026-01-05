@@ -38,7 +38,7 @@ spec:
                   name: mysql-secret
                   key: MYSQL_ROOT_PASSWORD 
 
-            - name: MYSQL_HEALTHCHECK_PASSWORD
+            - name: MYSQL_PWD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
@@ -63,7 +63,7 @@ spec:
               command:
                 - sh
                 - -c
-                - mysqladmin ping -h 127.0.0.1 -u healthcheck -p"$MYSQL_HEALTHCHECK_PASSWORD" >/dev/null 2>&1
+                - mysqladmin ping -h 127.0.0.1 -u $MYSQL_HEALTHCHECK_USER >/dev/null 2>&1
             initialDelaySeconds: 15
             periodSeconds: 5
             timeoutSeconds: 5
@@ -80,7 +80,7 @@ spec:
               command:
                 - sh
                 - -c
-                - mysql -h 127.0.0.1 -u healthcheck -p"$MYSQL_HEALTHCHECK_PASSWORD" -e "SELECT 1" >/dev/null 2>&1
+                - mysql -h 127.0.0.1 -u $MYSQL_HEALTHCHECK_USER -e "SELECT 1" >/dev/null 2>&1
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 5
@@ -96,7 +96,7 @@ spec:
               command:
                 - sh
                 - -c
-                - mysqladmin ping -h 127.0.0.1 -u healthcheck -p"$MYSQL_HEALTHCHECK_PASSWORD" >/dev/null 2>&1
+                - mysqladmin ping -h 127.0.0.1 -u $MYSQL_HEALTHCHECK_USER >/dev/null 2>&1
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
