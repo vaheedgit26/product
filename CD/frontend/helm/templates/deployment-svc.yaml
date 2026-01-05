@@ -19,7 +19,7 @@ spec:
     spec:
 
       initContainers:
-      - name: wait-for-product-backend
+      - name: wait-for-product-backend-app
         image: busybox:1.31
         command: ['sh', '-c', 'echo -e "Checking for the availability of Backend Server deployment"; until nc -z product-backend 8080; do sleep 1; printf "-"; done; echo -e "  >> Backend Server has been started";']
 
