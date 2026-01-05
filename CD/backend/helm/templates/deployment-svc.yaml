@@ -26,7 +26,7 @@ spec:
             - -c
             - |
               echo "Waiting for MySQL to be ready..."
-              until mysql -h $DB_HOST -u healthcheck -e "SELECT 1" >/dev/null 2>&1; do
+              until mysql -h $DB_HOST -u $DB_HEALTHCHECK_USER -e "SELECT 1" >/dev/null 2>&1; do
                 sleep 3
               done
               echo "MySQL is ready"
@@ -35,7 +35,13 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: product-backend-env-vars  
-              key: DB_HOST  
+              key: DB_HOST
+
+        - name: DB_HEALTHCHECK_USER  
+          valueFrom:
+            configMapKeyRef:
+              name: product-backend-env-vars  
+              key: DB_HEALTHCHECK_USER
               
         - name: MYSQL_PWD
           valueFrom:
