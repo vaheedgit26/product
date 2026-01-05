@@ -47,7 +47,7 @@ spec:
             - name: DB_HEALTHCHECK_USER  
               valueFrom:
                 configMapKeyRef:
-                  name: product-backend-env-vars  
+                  name: mysql-initdb-config  
                   key: DB_HEALTHCHECK_USER
 
           volumeMounts:
