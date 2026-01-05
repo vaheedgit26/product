@@ -52,6 +52,7 @@ spec:
       containers:
       - name: product-backend-cont
         image: "{{ .Values.image.imageName }}:{{ .Values.image.imageVersion }}"   # vaheeddockerhub/product-img
+        imagePullPolicy: IfNotPresent
         ports:
         - name: product
           containerPort: 8080
