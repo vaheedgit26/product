@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: expense
+  name: product
   namespace: argocd
 spec:
   # Allowed Git repositories
@@ -9,16 +9,16 @@ spec:
     # - https://github.com/my-org/*              # Allow all repos under your org
     # - https://github.com/my-org/expense.git  # Or specific repo
     
-    - https://github.com/vaheedgit26/expense.git
+    - https://github.com/vaheedgit26/product.git
 
   # Allowed destinations (namespaces + clusters)
   destinations:
     - server: https://kubernetes.default.svc
-      namespace: expense-dev
+      namespace: product-dev
     - server: https://kubernetes.default.svc
-      namespace: expense-stage
+      namespace: product-stage
     - server: https://kubernetes.default.svc
-      namespace: expense-prod
+      namespace: product-prod
 
   # Cluster-wide resources this AppProject can manage
   clusterResourceWhitelist:
