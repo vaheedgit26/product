@@ -23,13 +23,10 @@ RUN mkdir -p \
   && chmod 755 /etc/nginx
 
 # Copy custom NGINX config
-COPY Docker_Stuff/expense.conf /etc/nginx/conf.d/expense.conf
+COPY product.conf /etc/nginx/conf.d/product.conf
 
 # Ensure config file permissions
 RUN chmod 644 /etc/nginx/conf.d/*.conf
-
-# Copy frontend files
-COPY code/. /usr/share/nginx/html/
 
 EXPOSE 8080
 
