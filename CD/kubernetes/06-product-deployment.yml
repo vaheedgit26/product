@@ -1,95 +1,77 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: product-backend
+  name: product-frontend
   labels:
-    app: product-backend
-    tier: backend
+    app: product-frontend
+    tier: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: product-backend
-      tier: backend
+      app: product-frontend
+      tier: frontend
   template:
     metadata:
       labels:
-        app: product-backend
-        tier: backend
+        app: product-frontend
+        tier: frontend
     spec:
-           
-      initContainers:
-      - name: connectivity-init-db
-        image: mysql:8.0
-        command: ["sh", "-c", 'echo -e "Checking for the availability of MySQL Server"; until mysqladmin ping -h "$DB_HOST" -u root -p"$MYSQL_ROOT_PASSWORD"; do sleep 1; printf "-"; done; echo -e "  >> MySQL DB Server has started";']
-        #command: ['/bin/bash', '-c', '/mnt/mysql_health_check.sh && mysql -h $MYSQL_HOST -u$MYSQL_ROOT_PASSWORD -p$MYSQL_ROOT_PASSWORD < /mnt/init.sql']
-        env:
-        - name: DB_HOST  
-          valueFrom:
-            configMapKeyRef:
-              name: product-backend-env-vars  
-              key: DB_HOST  
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: MYSQL_ROOT_PASSWORD
-            
-      containers:
-      - name: product-backend-cont
-        image: vaheeddockerhub/product-img
-        ports:
-        - name: product
-          containerPort: 8080
-        env:
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-secret
-              key: DB_PASSWORD
-        envFrom:
-        - configMapRef:
-            name: product-backend-env-vars
 
+      initContainers:
+      - name: wait-for-product-backend-app
+        image: busybox:1.31
+        command: ['sh', '-c', 'echo -e "Checking for the availability of Backend Server deployment"; until nc -z product-backend 8080; do sleep 1; printf "-"; done; echo -e "  >> Backend Server has been started";']
+
+      containers:
+      - name: product-frontend-cont
+        image: <<IMAGE-NAME>>
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: frontend
+          containerPort: 8080
+      
         startupProbe:
           tcpSocket:
             port: 8080
-          initialDelaySeconds: 30
+          initialDelaySeconds: 20
           periodSeconds: 10
-          timeoutSeconds: 10
-          failureThreshold: 6
-        
+          timeoutSeconds: 5
+          failureThreshold: 10
+
         readinessProbe:
-            tcpSocket:
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 3
-         
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
         livenessProbe:
-            tcpSocket:
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 3
+          httpGet:
+            path: /nginx-health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: product-backend
+  name: product-frontend
   labels:
-    app: product-backend
-    tier: backend
+    app: product-frontend
+    tier: frontend
 spec:
-  #type: ClusterIP
+  type: NodePort
   selector:
-    app: product-backend
-    tier: backend
+    app: product-frontend
+    tier: frontend
   ports:
-  - name: product
+  - name: frontend
     protocol: "TCP"
     port: 8080
     targetPort: 8080
-    #nodePort: 32123
+    nodePort: 32000
