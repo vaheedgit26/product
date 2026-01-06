@@ -7,11 +7,7 @@ data:
 
   # Mysql init script
   init.sql: |
-      -- Create probe user with minimal privileges
-      CREATE USER IF NOT EXISTS 'healthcheck'@'%'
-      IDENTIFIED WITH mysql_native_password BY 'p@ssword';
-      
-      -- Minimal permission just to authenticate
+      CREATE USER IF NOT EXISTS 'healthcheck'@'%' IDENTIFIED WITH mysql_native_password BY 'p@ssword';
       GRANT USAGE ON *.* TO 'healthcheck'@'%';
       
       CREATE DATABASE IF NOT EXISTS product;
@@ -26,8 +22,7 @@ data:
         PRIMARY KEY (id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
       
-      CREATE USER IF NOT EXISTS 'product'@'%'
-      IDENTIFIED WITH mysql_native_password BY 'product';
-      
+      CREATE USER IF NOT EXISTS 'product'@'%' IDENTIFIED WITH mysql_native_password BY 'product';
       GRANT ALL PRIVILEGES ON product.* TO 'product'@'%';
       FLUSH PRIVILEGES;
+
