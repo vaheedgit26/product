@@ -18,80 +18,93 @@ spec:
         tier: db
     spec: 
       volumes:
-      - name: mysql-init-db
-        configMap:
-          name: mysql-initdb-config
+        - name: mysql-init-db
+          configMap:
+            name: mysql-initdb-config  
+            
+      containers:
+        - name: mysql-cont
+          image: mysql:8.0
+          imagePullPolicy: IfNotPresent
 
-      - name: mysql-config
-        emptyDir: {}  # Creates a writable temporary directory for mysql.cnf
-
-      initContainers:
-        - name: init-mysql-config
-          image: busybox:1.31
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              echo "[client]" > /var/tmp/mysql.cnf
-              echo "user=root" >> /var/tmp/mysql.cnf
-              echo "password=$MYSQL_ROOT_PASSWORD" >> /var/tmp/mysql.cnf
-            # echo "host=127.0.0.1" >> /var/tmp/mysql.cnf
-          volumeMounts:
-            - name: mysql-config
-              mountPath: /var/tmp
+          ports:
+            - name: mysql
+              containerPort: 3306
+          
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: MYSQL_ROOT_PASSWORD    
+                  key: MYSQL_ROOT_PASSWORD 
 
-      containers:
-        - name: mysql-cont
-          image: mysql:8.0
-          ports:
-          - containerPort: 3306
-            name: mysql 
-          env:
-          - name: MYSQL_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mysql-secret
-                key: MYSQL_ROOT_PASSWORD 
+            - name: DB_HEALTHCHECK_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: DB_HEALTHCHECK_USER
+
+            - name: DB_HEALTHCHECK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: DB_HEALTHCHECK_PASSWORD
+
           volumeMounts:
             - name: mysql-init-db
-              mountPath: /docker-entrypoint-initdb.d/init.sql
-              subPath: init.sql  # Mount only init.sql, not the entire ConfigMap
-            - name: mysql-config
-              mountPath: /var/tmp
-              #subPath: mysql.cnf
-              
+              mountPath: /docker-entrypoint-initdb.d
+              # subPath: init.sql  # Mount only init.sql, not the entire ConfigMap
+            
+          # ─────────────────────────────
+          # STARTUP PROBE (root)
+          # ───────────────────────────── 
+          # Purpose:
+          # - Give MySQL enough time to initialize
+          # - Prevent liveness probe from killing it during startup      
           startupProbe:
             exec:
-              #command: ["/bin/sh", "-c", "sleep 10; until mysqladmin ping -h 127.0.0.1 -uroot -p'$MYSQL_ROOT_PASSWORD' --silent; do echo waiting for mysql; sleep 2; done"]
-              command: ['sh', '-c', 'until mysql --defaults-extra-file=/var/tmp/mysql.cnf -h localhost -e "SELECT 1;" > /dev/null 2>&1;do echo "waiting for mysql"; sleep 2; done']
-            initialDelaySeconds: 40  
-            failureThreshold: 30   # Allows up to 5 minutes for MySQL startup (30 times * 10s)
-            periodSeconds: 10      # Check every 10 seconds
-            timeoutSeconds: 15     # Timeout if MySQL doesnt respond in 30 seconds
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -u root -p"$MYSQL_ROOT_PASSWORD" >/dev/null 2>&1
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
 
-          livenessProbe:
-            exec:
-              command: ['sh', '-c', 'mysqladmin --defaults-extra-file=/var/tmp/mysql.cnf ping -h 127.0.0.1']
-            initialDelaySeconds: 15  # Not needed since startupProbe ensures MySQL is running
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 3
-
+          # ─────────────────────────────
+          # READINESS PROBE (custom user)
+          # ─────────────────────────────
+          # Purpose:
+          # - Check if MySQL is ready to accept queries
+          # - Pod is removed from Service if this fails
           readinessProbe:
             exec:
-              command: ['sh', '-c', 'mysqladmin --defaults-extra-file=/var/tmp/mysql.cnf ping -h 127.0.0.1']
-            initialDelaySeconds: 15  # Handled by startupProbe
-            periodSeconds: 10
-            timeoutSeconds: 10
+              command:
+                - sh
+                - -c
+                - mysql -h 127.0.0.1 -u "$DB_HEALTHCHECK_USER" -p"$DB_HEALTHCHECK_PASSWORD" -e "SELECT 1" >/dev/null 2>&1
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 5
             failureThreshold: 3
 
-      
-             
+          # ─────────────────────────────
+          # LIVENESS PROBE  (custom user)
+          # ─────────────────────────────
+          # Purpose:
+          # - Restart container if MySQL is hung or dead
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -u "$DB_HEALTHCHECK_USER" -p"$DB_HEALTHCHECK_PASSWORD" >/dev/null 2>&1
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            
 ---
 apiVersion: v1
 kind: Service
@@ -108,5 +121,5 @@ spec:
   ports:
   - name: mysqldb-port
     protocol: "TCP"
-    port: 3306
-    targetPort: 3306 
+    port: 3306           # Service port
+    targetPort: 3306     # Container port
