@@ -25,7 +25,8 @@ spec:
 
       containers:
       - name: product-frontend-cont
-        image: <<Image-Name>>          
+        image: "{{ .Values.image.imageName }}:{{ .Values.image.imageVersion }}"
+        imagePullPolicy: IfNotPresent
         ports:
         - name: frontend
           containerPort: 8080
@@ -35,7 +36,7 @@ spec:
             port: 8080
           initialDelaySeconds: 20
           periodSeconds: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 10
 
         readinessProbe:
@@ -43,7 +44,7 @@ spec:
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 3
 
         livenessProbe:
@@ -52,7 +53,7 @@ spec:
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 3
           
 ---
@@ -73,4 +74,4 @@ spec:
     protocol: "TCP"
     port: 8080
     targetPort: 8080
-    nodePort: 32127
+    nodePort: 32000
