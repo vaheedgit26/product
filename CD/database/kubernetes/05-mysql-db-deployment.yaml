@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: mysql
 spec: 
-  replicas: 1
+  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
       db: mysql
@@ -38,17 +38,17 @@ spec:
                   name: mysql-secret
                   key: MYSQL_ROOT_PASSWORD 
 
-            - name: MYSQL_PWD
+            - name: DB_HEALTHCHECK_USER
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: MYSQL_HEALTHCHECK_PASSWORD
-
-            - name: DB_HEALTHCHECK_USER  
-              valueFrom:
-                configMapKeyRef:
-                  name: product-backend-env-vars  
                   key: DB_HEALTHCHECK_USER
+
+            - name: DB_HEALTHCHECK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: DB_HEALTHCHECK_PASSWORD
 
           volumeMounts:
             - name: mysql-init-db
@@ -56,7 +56,7 @@ spec:
               # subPath: init.sql  # Mount only init.sql, not the entire ConfigMap
             
           # ─────────────────────────────
-          # STARTUP PROBE
+          # STARTUP PROBE (root)
           # ───────────────────────────── 
           # Purpose:
           # - Give MySQL enough time to initialize
@@ -66,14 +66,14 @@ spec:
               command:
                 - sh
                 - -c
-                - mysqladmin ping -h 127.0.0.1 -u $DB_HEALTHCHECK_USER >/dev/null 2>&1
-            initialDelaySeconds: 15
+                - mysqladmin ping -h 127.0.0.1 -u root -p"$MYSQL_ROOT_PASSWORD" >/dev/null 2>&1
+            initialDelaySeconds: 20
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 30
 
           # ─────────────────────────────
-          # READINESS PROBE
+          # READINESS PROBE (custom user)
           # ─────────────────────────────
           # Purpose:
           # - Check if MySQL is ready to accept queries
@@ -83,14 +83,14 @@ spec:
               command:
                 - sh
                 - -c
-                - mysql -h 127.0.0.1 -u $DB_HEALTHCHECK_USER -e "SELECT 1" >/dev/null 2>&1
-            initialDelaySeconds: 10
+                - mysql -h 127.0.0.1 -u "$DB_HEALTHCHECK_USER" -p"$DB_HEALTHCHECK_PASSWORD" -e "SELECT 1" >/dev/null 2>&1
+            initialDelaySeconds: 20
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 3
 
           # ─────────────────────────────
-          # LIVENESS PROBE
+          # LIVENESS PROBE  (custom user)
           # ─────────────────────────────
           # Purpose:
           # - Restart container if MySQL is hung or dead
@@ -99,7 +99,7 @@ spec:
               command:
                 - sh
                 - -c
-                - mysqladmin ping -h 127.0.0.1 -u $DB_HEALTHCHECK_USER >/dev/null 2>&1
+                - mysqladmin ping -h 127.0.0.1 -u "$DB_HEALTHCHECK_USER" -p"$DB_HEALTHCHECK_PASSWORD" >/dev/null 2>&1
             initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
