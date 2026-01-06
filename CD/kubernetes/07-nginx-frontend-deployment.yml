@@ -18,49 +18,42 @@ spec:
         tier: frontend
     spec:
 
-      volumes:
-      - name: product-nginx-reverse-proxy
-        configMap:
-          name: product-nginx-reverse-proxy
-
       initContainers:
-      - name: check-nginx-ready
+      - name: wait-for-product-backend-app
         image: busybox:1.31
         command: ['sh', '-c', 'echo -e "Checking for the availability of Backend Server deployment"; until nc -z product-backend 8080; do sleep 1; printf "-"; done; echo -e "  >> Backend Server has been started";']
 
       containers:
       - name: product-frontend-cont
-        image: nginx:1.27.4
+        image: <<IMAGE-NAME>>
+        imagePullPolicy: IfNotPresent
         ports:
         - name: frontend
-          containerPort: 80
-        volumeMounts:
-        - name: product-nginx-reverse-proxy
-          mountPath: /etc/nginx/conf.d/
-
+          containerPort: 8080
+      
         startupProbe:
           tcpSocket:
-            port: 80
+            port: 8080
           initialDelaySeconds: 20
           periodSeconds: 10
-          timeoutSeconds: 10
-          failureThreshold: 6
+          timeoutSeconds: 5
+          failureThreshold: 10
 
         readinessProbe:
           tcpSocket:
-            port: 80
+            port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 3
 
         livenessProbe:
           httpGet:
             path: /nginx-health
-            port: 80
+            port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 5
           failureThreshold: 3
           
 ---
@@ -79,6 +72,6 @@ spec:
   ports:
   - name: frontend
     protocol: "TCP"
-    port: 80
-    targetPort: 80
-    nodePort: 32127
+    port: 8080
+    targetPort: 8080
+    nodePort: 32000
