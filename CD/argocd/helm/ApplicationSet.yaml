@@ -9,13 +9,13 @@ spec:
       elements:
         - project: product
           env: dev
-          component: backend
+          component: database 
+        - project: product
+          env: dev
+          component: backend 
         - project: product
           env: dev
           component: frontend
-        - project: product
-          env: dev
-          component: database
 
   template:
     metadata:
