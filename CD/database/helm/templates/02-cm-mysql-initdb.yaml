@@ -3,15 +3,6 @@ kind: ConfigMap
 metadata:
   name: mysql-initdb-config
 data:
-  # ─────────────────────────────
-# ConfigMap with init SQL only
-# ─────────────────────────────
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mysql-initdb-config
-  namespace: product-dev
-data:
   # Mysql init script
   init.sql: |
       /*
