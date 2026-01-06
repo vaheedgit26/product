@@ -84,7 +84,7 @@ spec:
                 - sh
                 - -c
                 - mysql -h 127.0.0.1 -u "$DB_HEALTHCHECK_USER" -p"$DB_HEALTHCHECK_PASSWORD" -e "SELECT 1" >/dev/null 2>&1
-            initialDelaySeconds: 25
+            initialDelaySeconds: 20
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 3
