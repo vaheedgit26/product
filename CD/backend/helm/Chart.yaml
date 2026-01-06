@@ -2,4 +2,4 @@ apiVersion: v2
 name: product-backend
 version: 1.0.0     # chart version
 description: This is product backend deployment
-appVersion: 1.0.0  # 'backend' app version
+appVersion: 1.0.0  # 'product-backend' app version
