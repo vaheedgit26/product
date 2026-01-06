@@ -68,7 +68,7 @@ spec:
                 - -c
                 - mysqladmin ping -h 127.0.0.1 -u root -p"$MYSQL_ROOT_PASSWORD" >/dev/null 2>&1
             initialDelaySeconds: 20
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 30
 
@@ -85,7 +85,7 @@ spec:
                 - -c
                 - mysql -h 127.0.0.1 -u "$DB_HEALTHCHECK_USER" -p"$DB_HEALTHCHECK_PASSWORD" -e "SELECT 1" >/dev/null 2>&1
             initialDelaySeconds: 20
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
 
